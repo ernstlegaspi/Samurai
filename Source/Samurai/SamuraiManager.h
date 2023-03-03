@@ -22,6 +22,9 @@ protected:
 	UAnimMontage* AM_Slash1;
 
 	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_Slash2;
+
+	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_Idle;
 
 	UPROPERTY(EditAnywhere)
@@ -35,6 +38,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UInputAction* Slash1Action;
+
+	UPROPERTY(EditAnywhere)
+	UInputAction* Slash2Action;
 
 	UPROPERTY(EditAnywhere)
 	UInputAction* MoveAction;
@@ -51,10 +57,15 @@ protected:
 	UPROPERTY()
 	UAnimMontage* PrevMontage;
 
-	bool MIsPlaying(class UAnimMontage* AM);
-	void HandleAnimation(class UAnimMontage* AM);
+	UPROPERTY()
+	UAnimMontage* CurrentSlash;
+
+	bool MIsPlaying(UAnimMontage* AM);
+	void HandleAnimation(UAnimMontage* AM);
 	void Move(const FInputActionValue& Value);
-	void SlashStart();
+	void SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM);
+	void Slash1Start();
+	void Slash2Start();
 	void Run();
 	void RunCompleted();
 

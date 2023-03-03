@@ -46,15 +46,15 @@ void ASamuraiManager::Tick(float DeltaTime) {
 		else HandleAnimation(AM_Idle);
 	}
 	else {
-		if(!MIsPlaying(AM_Slash1)) bSlashing = false;
+		if(!MIsPlaying(CurrentSlash)) bSlashing = false;
 	}
 }
 
-bool ASamuraiManager::MIsPlaying(class UAnimMontage* AM) {
+bool ASamuraiManager::MIsPlaying(UAnimMontage* AM) {
 	return AnimInstance->Montage_IsPlaying(AM);
 }
 
-void ASamuraiManager::HandleAnimation(class UAnimMontage* AM) {
+void ASamuraiManager::HandleAnimation(UAnimMontage* AM) {
 	if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0, PrevMontage);
 	if(!MIsPlaying(AM)) AnimInstance->Montage_Play(AM);
 
@@ -76,13 +76,22 @@ void ASamuraiManager::Move(const FInputActionValue& Value) {
 	}
 }
 
-void ASamuraiManager::SlashStart() {
-	if(!MIsPlaying(AM_Slash1)) {
-		if(MIsPlaying(PrevMontage) && PrevMontage != AM_Slash1) AnimInstance->Montage_Stop(0, PrevMontage);
-		AnimInstance->Montage_Play(AM_Slash1);
-		PrevMontage = AM_Slash1;
+void ASamuraiManager::SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM) {
+	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM)) {
+		if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0, PrevMontage);
+		AnimInstance->Montage_Play(AM);
+		PrevMontage = AM;
 		bSlashing = true;
+		CurrentSlash = AM;
 	}
+}
+
+void ASamuraiManager::Slash1Start() {
+	SlashManager(AM_Slash1, AM_Slash2);
+}
+
+void ASamuraiManager::Slash2Start() {
+	SlashManager(AM_Slash2, AM_Slash1);
 }
 
 void ASamuraiManager::Run() {
@@ -100,6 +109,7 @@ void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Move);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Run);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ASamuraiManager::RunCompleted);
-		EnhancedInputComponent->BindAction(Slash1Action, ETriggerEvent::Started, this, &ASamuraiManager::SlashStart);
+		EnhancedInputComponent->BindAction(Slash1Action, ETriggerEvent::Started, this, &ASamuraiManager::Slash1Start);
+		EnhancedInputComponent->BindAction(Slash2Action, ETriggerEvent::Started, this, &ASamuraiManager::Slash2Start);
 	}
 }
