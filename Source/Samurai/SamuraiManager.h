@@ -37,6 +37,9 @@ protected:
 	class UInputMappingContext* SamuraiMappingContext;
 
 	UPROPERTY(EditAnywhere)
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere)
 	UInputAction* Slash1Action;
 
 	UPROPERTY(EditAnywhere)
@@ -47,6 +50,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UInputAction* RunAction;
+
+	UPROPERTY(EditAnywhere)
+	UInputAction* MouseLookAction;
 
 	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* SamuraiTrigger;
@@ -63,6 +69,7 @@ protected:
 	bool MIsPlaying(UAnimMontage* AM);
 	void HandleAnimation(UAnimMontage* AM);
 	void Move(const FInputActionValue& Value);
+	void MouseLook(const FInputActionValue& Value);
 	void SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM);
 	void Slash1Start();
 	void Slash2Start();
@@ -74,7 +81,6 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };

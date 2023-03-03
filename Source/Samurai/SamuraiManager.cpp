@@ -1,9 +1,11 @@
 #include "SamuraiManager.h"
+#include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 ASamuraiManager::ASamuraiManager() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -32,21 +34,26 @@ void ASamuraiManager::BeginPlay() {
 void ASamuraiManager::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if(!bSlashing) {
-		if(GetVelocity() != FVector(0, 0, 0)) {
-			if(bShiftPressed) {
-				HandleAnimation(AM_Run);
-				GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	if(GetCharacterMovement()->IsMovingOnGround()) {
+		if(!bSlashing) {
+			if(GetVelocity() != FVector(0, 0, 0)) {
+				if(bShiftPressed) {
+					HandleAnimation(AM_Run);
+					GetCharacterMovement()->MaxWalkSpeed = 500.f;
+				}
+				else {
+					HandleAnimation(AM_Walk);
+					GetCharacterMovement()->MaxWalkSpeed = 150.f;
+				}
 			}
-			else {
-				HandleAnimation(AM_Walk);
-				GetCharacterMovement()->MaxWalkSpeed = 150.f;
-			}
+			else HandleAnimation(AM_Idle);
 		}
-		else HandleAnimation(AM_Idle);
+		else {
+			if(!MIsPlaying(CurrentSlash)) bSlashing = false;
+		}
 	}
 	else {
-		if(!MIsPlaying(CurrentSlash)) bSlashing = false;
+		// insert jump animation
 	}
 }
 
@@ -73,6 +80,15 @@ void ASamuraiManager::Move(const FInputActionValue& Value) {
 
 		AddMovementInput(Forward, Dir.Y);
 		AddMovementInput(Right, Dir.X);
+	}
+}
+
+void ASamuraiManager::MouseLook(const FInputActionValue& Value) {
+	const FVector2D LookAxis = Value.Get<FVector2D>();
+
+	if(Controller != nullptr) {
+		AddControllerYawInput(-LookAxis.X);
+		AddControllerPitchInput(LookAxis.Y);
 	}
 }
 
@@ -106,7 +122,10 @@ void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Move);
+		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ASamuraiManager::MouseLook);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Run);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ASamuraiManager::RunCompleted);
 		EnhancedInputComponent->BindAction(Slash1Action, ETriggerEvent::Started, this, &ASamuraiManager::Slash1Start);
