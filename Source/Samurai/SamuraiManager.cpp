@@ -32,17 +32,22 @@ void ASamuraiManager::BeginPlay() {
 void ASamuraiManager::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if(GetVelocity() != FVector(0, 0, 0)) {
-		if(bShiftPressed) {
-			HandleAnimation(AM_Run);
-			GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	if(!bSlashing) {
+		if(GetVelocity() != FVector(0, 0, 0)) {
+			if(bShiftPressed) {
+				HandleAnimation(AM_Run);
+				GetCharacterMovement()->MaxWalkSpeed = 500.f;
+			}
+			else {
+				HandleAnimation(AM_Walk);
+				GetCharacterMovement()->MaxWalkSpeed = 150.f;
+			}
 		}
-		else {
-			HandleAnimation(AM_Walk);
-			GetCharacterMovement()->MaxWalkSpeed = 150.f;
-		}
+		else HandleAnimation(AM_Idle);
 	}
-	else HandleAnimation(AM_Idle);
+	else {
+		if(!MIsPlaying(AM_Slash1)) bSlashing = false;
+	}
 }
 
 bool ASamuraiManager::MIsPlaying(class UAnimMontage* AM) {
@@ -71,6 +76,15 @@ void ASamuraiManager::Move(const FInputActionValue& Value) {
 	}
 }
 
+void ASamuraiManager::SlashStart() {
+	if(!MIsPlaying(AM_Slash1)) {
+		if(MIsPlaying(PrevMontage) && PrevMontage != AM_Slash1) AnimInstance->Montage_Stop(0, PrevMontage);
+		AnimInstance->Montage_Play(AM_Slash1);
+		PrevMontage = AM_Slash1;
+		bSlashing = true;
+	}
+}
+
 void ASamuraiManager::Run() {
 	bShiftPressed = true;
 }
@@ -86,5 +100,6 @@ void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Move);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Run);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ASamuraiManager::RunCompleted);
+		EnhancedInputComponent->BindAction(Slash1Action, ETriggerEvent::Started, this, &ASamuraiManager::SlashStart);
 	}
 }

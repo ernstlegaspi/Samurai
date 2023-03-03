@@ -19,6 +19,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_Slash1;
+
+	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_Idle;
 
 	UPROPERTY(EditAnywhere)
@@ -29,6 +32,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UInputMappingContext* SamuraiMappingContext;
+
+	UPROPERTY(EditAnywhere)
+	UInputAction* Slash1Action;
 
 	UPROPERTY(EditAnywhere)
 	UInputAction* MoveAction;
@@ -48,10 +54,12 @@ protected:
 	bool MIsPlaying(class UAnimMontage* AM);
 	void HandleAnimation(class UAnimMontage* AM);
 	void Move(const FInputActionValue& Value);
+	void SlashStart();
 	void Run();
 	void RunCompleted();
 
-	bool bShiftPressed;
+	float Slash1Time;
+	bool bShiftPressed, bSlashing;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
