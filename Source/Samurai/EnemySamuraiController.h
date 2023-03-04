@@ -16,6 +16,9 @@ protected:
 	class APawn* Samurai;
 
 	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_Attack;
+
+	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_Idle;
 
 	UPROPERTY(EditAnywhere)

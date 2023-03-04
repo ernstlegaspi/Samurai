@@ -36,7 +36,11 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 			HandleAnimation(AM_Run);
 			MoveToLocation(Samurai->GetActorLocation());
 			ESamurai->Character->MaxWalkSpeed = 350.f;
-			bIdleDone = false;
+		}
+		else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 130.f) {
+			StopMovement();
+			HandleAnimation(AM_Attack);
+			GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
 		}
 		else {
 			ESamurai->Character->MaxWalkSpeed = 150.f;
@@ -46,15 +50,19 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 				MoveToLocation(Samurai->GetActorLocation());
 			}
 			else {
-				GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetPawn()->GetActorLocation(), Samurai->GetActorLocation()));
+				GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
 			}
 		}
+
+		IdleTimer = 3.f;
 	}
 	else {
 		bPlayStanceOnce = false;
 		FollowDistance = 0;
 
 		if(IdleTimer <= 0) {
+			ESamurai->Character->MaxWalkSpeed = 200.f;
+
 			if(!bIdleDone) {
 				bOnGround = NavLoc->GetRandomReachablePointInRadius(PawnLoc, 1500.f, Loc);
 				MoveToLocation(Loc.Location);
