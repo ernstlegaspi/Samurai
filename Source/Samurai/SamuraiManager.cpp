@@ -1,6 +1,7 @@
 #include "SamuraiManager.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -17,6 +18,11 @@ ASamuraiManager::ASamuraiManager() {
 	SamuraiTrigger = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Samurai Trigger"));
 	SamuraiTrigger->InitCapsuleSize(80.f, 50.f);
 	SamuraiTrigger->SetupAttachment(RootComponent);
+
+	WeaponTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Trigger"));
+	WeaponTrigger->SetCollisionProfileName(TEXT("OverlapAll"));
+	WeaponTrigger->SetGenerateOverlapEvents(true);
+	WeaponTrigger->SetupAttachment(GetMesh(), FName("WeaponTrigger"));
 }
 
 void ASamuraiManager::BeginPlay() {
@@ -29,6 +35,7 @@ void ASamuraiManager::BeginPlay() {
 	}
 
 	AnimInstance = GetMesh()->GetAnimInstance();
+	WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ASamuraiManager::Tick(float DeltaTime) {

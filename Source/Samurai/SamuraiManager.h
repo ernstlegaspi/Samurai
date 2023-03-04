@@ -15,6 +15,9 @@ class SAMURAI_API ASamuraiManager : public ACharacter {
 public:
 	ASamuraiManager();
 
+	UPROPERTY(VisibleAnywhere)
+	class UBoxComponent* WeaponTrigger;
+
 protected:
 	virtual void BeginPlay() override;
 

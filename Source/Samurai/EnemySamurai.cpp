@@ -25,7 +25,7 @@ void AEnemySamurai::Tick(float DeltaTime) {
 }
 
 void AEnemySamurai::EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	UE_LOG(LogTemp, Warning, TEXT("Enemy Hit"));
+	if(OtherActor != this) UE_LOG(LogTemp, Warning, TEXT("Name: %s"), *OtherActor->GetName());
 }
 
 void AEnemySamurai::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
