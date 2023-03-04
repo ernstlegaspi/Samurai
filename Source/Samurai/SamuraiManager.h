@@ -31,6 +31,9 @@ protected:
 	UAnimMontage* AM_Idle;
 
 	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_Jump;
+
+	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_Walk;
 
 	UPROPERTY(EditAnywhere)
@@ -80,7 +83,7 @@ protected:
 	void RunCompleted();
 
 	float Slash1Time;
-	bool bShiftPressed, bSlashing;
+	bool bShiftPressed, bSlashing, bJumping;
 
 public:	
 	virtual void Tick(float DeltaTime) override;

@@ -58,9 +58,12 @@ void ASamuraiManager::Tick(float DeltaTime) {
 		else {
 			if(!MIsPlaying(CurrentSlash)) bSlashing = false;
 		}
+
+		bJumping = false;
 	}
 	else {
-		// insert jump animation
+		HandleAnimation(AM_Jump);
+		bJumping = true;
 	}
 }
 
@@ -78,7 +81,7 @@ void ASamuraiManager::HandleAnimation(UAnimMontage* AM) {
 void ASamuraiManager::Move(const FInputActionValue& Value) {
 	const FVector2D Dir = Value.Get<FVector2D>();
 
-	if(Controller != nullptr) {
+	if(Controller != nullptr && !bJumping) {
 		FRotator SamuraiRotation = GetControlRotation();
 		FRotator NewYawRotation(0, SamuraiRotation.Yaw, 0);
 
@@ -100,7 +103,7 @@ void ASamuraiManager::MouseLook(const FInputActionValue& Value) {
 }
 
 void ASamuraiManager::SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM) {
-	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM)) {
+	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM) && !bJumping) {
 		if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0, PrevMontage);
 		AnimInstance->Montage_Play(AM);
 		PrevMontage = AM;
@@ -118,11 +121,11 @@ void ASamuraiManager::Slash2Start() {
 }
 
 void ASamuraiManager::Run() {
-	bShiftPressed = true;
+	if(!bJumping) bShiftPressed = true;
 }
 
 void ASamuraiManager::RunCompleted() {
-	bShiftPressed = false;
+	if(!bJumping) bShiftPressed = false;
 }
 
 void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
