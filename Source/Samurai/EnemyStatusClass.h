@@ -12,13 +12,13 @@ class SAMURAI_API UEnemyStatusClass : public UUserWidget {
 public:
 	void SetHealth(float CurrentHealth);
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UProgressBar* EnemyHealth;
-
 protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* EnemyName;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UProgressBar* EnemyHealth;
 
 };

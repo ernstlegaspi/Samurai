@@ -5,7 +5,6 @@
 void UEnemyStatusClass::NativeConstruct() {
 	Super::NativeConstruct();
 
-	UE_LOG(LogTemp, Warning, TEXT(":dsa"));
 	EnemyName->SetText(FText::FromString("Oni Samurai"));
 }
 

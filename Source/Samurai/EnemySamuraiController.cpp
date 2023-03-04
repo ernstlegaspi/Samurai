@@ -10,7 +10,7 @@ void AEnemySamuraiController::BeginPlay() {
 	Super::BeginPlay();
 
 	Samurai = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	ESamurai = (AEnemySamurai*)UGameplayStatics::GetActorOfClass(GetWorld(), AEnemySamurai::StaticClass());
+	ESamurai = Cast<AEnemySamurai>(GetPawn());
 	NavLoc = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
 	bOnGround = NavLoc->GetRandomReachablePointInRadius(PawnLoc, 500.f, Loc);
 	MoveToLocation(Loc.Location);
@@ -25,43 +25,39 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 	PawnLoc = GetPawn()->GetActorLocation();
 
 	if(Dist(Samurai->GetActorLocation(), PawnLoc) <= (1000.f + FollowDistance)) {
-		if(!bPlayStanceOnce) {
-			StopMovement();
-			PlayAnim(AM_Stance);
-			bPlayStanceOnce = true;
-			FollowDistance = 1000.f;
-		}
-
-		if(Dist(Samurai->GetActorLocation(), PawnLoc) > 1000.f) {
-			HandleAnimation(AM_Run);
-			MoveToLocation(Samurai->GetActorLocation());
-			ESamurai->Character->MaxWalkSpeed = 350.f;
-		}
-		else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 130.f) {
-			StopMovement();
-			HandleAnimation(AM_Attack);
-			GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
-		}
-		else {
-			ESamurai->Character->MaxWalkSpeed = 150.f;
-
-			if(!MPlaying(AM_Stance)) {
-				HandleAnimation(AM_StanceForward);
+		if(ESamurai->bStanceFinished) {
+			if(Dist(Samurai->GetActorLocation(), PawnLoc) > 1000.f) {
 				MoveToLocation(Samurai->GetActorLocation());
+				ESamurai->Character->MaxWalkSpeed = 350.f;
+				ESamurai->AnimStage = EAnimationStage::Run;
+			}
+			else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 130.f) {
+				StopMovement();
+				GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
+				ESamurai->AnimStage = EAnimationStage::Attack;
 			}
 			else {
-				GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
+				ESamurai->Character->MaxWalkSpeed = 150.f;
+				ESamurai->AnimStage = EAnimationStage::StanceForward;
+				MoveToLocation(Samurai->GetActorLocation());
 			}
-		}
 
-		IdleTimer = 3.f;
+			IdleTimer = 3.f;
+		}
+		else {
+			StopMovement();
+			ESamurai->AnimStage = EAnimationStage::Stance;
+			GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
+			FollowDistance = 1000.f;
+		}
 	}
 	else {
-		bPlayStanceOnce = false;
 		FollowDistance = 0;
+		ESamurai->bStanceFinished = false;
 
 		if(IdleTimer <= 0) {
 			ESamurai->Character->MaxWalkSpeed = 200.f;
+			ESamurai->AnimStage = EAnimationStage::Walk;
 
 			if(!bIdleDone) {
 				bOnGround = NavLoc->GetRandomReachablePointInRadius(PawnLoc, 1500.f, Loc);
@@ -74,28 +70,14 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 				MoveToLocation(Loc.Location);
 				IdleTimer = 3.f;
 			}
-
-			if(!MPlaying(AM_Walk)) PlayAnim(AM_Walk);
 		}
 		else {
 			IdleTimer -= DeltaTime;
 			StopMovement();
-			HandleAnimation(AM_Idle);
+			ESamurai->AnimStage = EAnimationStage::Idle;
 			bIdleDone = false;
 		}
 	}
-}
-
-bool AEnemySamuraiController::MPlaying(UAnimMontage* AM) {
-	return ESamurai->AnimInstance->Montage_IsPlaying(AM);
-}
-
-void AEnemySamuraiController::HandleAnimation(UAnimMontage* AM) {
-	if(!MPlaying(AM)) PlayAnim(AM);
-}
-
-void AEnemySamuraiController::PlayAnim(UAnimMontage* AM) {
-	ESamurai->AnimInstance->Montage_Play(AM);
 }
 
 float AEnemySamuraiController::Dist(FVector D1, FVector D2) {
