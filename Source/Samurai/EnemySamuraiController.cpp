@@ -25,32 +25,34 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 	PawnLoc = GetPawn()->GetActorLocation();
 
 	if(Dist(Samurai->GetActorLocation(), PawnLoc) <= (1000.f + FollowDistance)) {
-		if(ESamurai->bStanceFinished) {
-			if(ESamurai->AnimStage != EAnimationStage::Attack) {
-				if(Dist(Samurai->GetActorLocation(), PawnLoc) > 1000.f) {
-					MoveToLocation(Samurai->GetActorLocation());
-					ESamurai->Character->MaxWalkSpeed = 350.f;
-					ESamurai->AnimStage = EAnimationStage::Run;
+		if(!ESamurai->bGotHit) {
+			if(ESamurai->bStanceFinished) {
+				if(ESamurai->AnimStage != EAnimationStage::Attack) {
+					if(Dist(Samurai->GetActorLocation(), PawnLoc) > 1000.f) {
+						MoveToLocation(Samurai->GetActorLocation());
+						ESamurai->Character->MaxWalkSpeed = 350.f;
+						ESamurai->AnimStage = EAnimationStage::Run;
+					}
+					else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 200.f) {
+						StopMovement();
+						GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
+						ESamurai->AnimStage = EAnimationStage::Attack;
+					}
+					else {
+						ESamurai->Character->MaxWalkSpeed = 150.f;
+						ESamurai->AnimStage = EAnimationStage::StanceForward;
+						MoveToLocation(Samurai->GetActorLocation());
+					}
 				}
-				else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 200.f) {
-					StopMovement();
-					GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
-					ESamurai->AnimStage = EAnimationStage::Attack;
-				}
-				else {
-					ESamurai->Character->MaxWalkSpeed = 150.f;
-					ESamurai->AnimStage = EAnimationStage::StanceForward;
-					MoveToLocation(Samurai->GetActorLocation());
-				}
-			}
 
-			IdleTimer = 3.f;
-		}
-		else {
-			StopMovement();
-			ESamurai->AnimStage = EAnimationStage::Stance;
-			GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
-			FollowDistance = 1000.f;
+				IdleTimer = 3.f;
+			}
+			else {
+				StopMovement();
+				ESamurai->AnimStage = EAnimationStage::Stance;
+				GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
+				FollowDistance = 1000.f;
+			}
 		}
 	}
 	else {

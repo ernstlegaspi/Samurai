@@ -5,12 +5,11 @@
 void USamuraiAttackState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
-	Samurai = (ASamuraiManager*)MeshComp->GetOwner();
-	if(Samurai) Samurai->WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if(ASamuraiManager* Samurai = (ASamuraiManager*)MeshComp->GetOwner()) Samurai->WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void USamuraiAttackState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
-
-	Samurai->WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	if(ASamuraiManager* Samurai = (ASamuraiManager*)MeshComp->GetOwner()) Samurai->WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

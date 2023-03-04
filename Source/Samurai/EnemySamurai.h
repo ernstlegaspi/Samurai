@@ -11,7 +11,9 @@ enum class EAnimationStage : uint8 {
 	Run = 2 UMETA(DisplayName = "RUN"),
 	Stance = 3 UMETA(DisplayName = "STANCE"),
 	StanceForward = 4 UMETA(DisplayName = "STANCEFORWARD"),
-	Walk = 5 UMETA(DisplayName = "WALK")
+	Walk = 5 UMETA(DisplayName = "WALK"),
+	HeadHit = 6 UMETA(DisplayName = "HEADHIT"),
+	BodyHit = 7 UMETA(DisplayName = "BODYHIT")
 };
 
 UCLASS()
@@ -27,7 +29,7 @@ public:
 	UPROPERTY()
 	EAnimationStage AnimStage;
 
-	bool bStanceFinished;
+	bool bStanceFinished, bGotHit;
 
 protected:
 	virtual void BeginPlay() override;
@@ -51,6 +53,12 @@ protected:
 	UAnimMontage* AM_Walk;
 
 	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_BodyHit;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_HeadHit;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> EnemyStatusWidget;
 
 	UPROPERTY(VisibleAnywhere)
@@ -71,8 +79,9 @@ protected:
 	UFUNCTION()
 	void EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	bool bStancePlayOnce, bAttackPlayOnce;
+	bool bStancePlayOnce, bAttackPlayOnce, bInHeadHitAnim;
 	float EnemyCurrentHealth;
+	short HitCount;
 
 	bool MPlaying(UAnimMontage* AM);
 	void HandleAnimation(UAnimMontage* AM);

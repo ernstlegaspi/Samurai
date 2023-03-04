@@ -114,10 +114,12 @@ void ASamuraiManager::SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM) {
 
 void ASamuraiManager::Slash1Start() {
 	SlashManager(AM_Slash1, AM_Slash2);
+	bLeftClick = true;
 }
 
 void ASamuraiManager::Slash2Start() {
 	SlashManager(AM_Slash2, AM_Slash1);
+	bLeftClick = false;
 }
 
 void ASamuraiManager::Run() {

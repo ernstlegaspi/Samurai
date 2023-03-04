@@ -18,6 +18,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UBoxComponent* WeaponTrigger;
 
+	bool bLeftClick;
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -31,6 +31,7 @@ void AEnemySamurai::BeginPlay() {
 	EnemyStatusClass = Cast<UEnemyStatusClass>(CreateWidget(GetWorld(), EnemyStatusWidget));
 	EnemyStatus->SetWidget(EnemyStatusClass);
 	EnemyCurrentHealth = 1.f;
+	HitCount = 0.f;
 }
 
 void AEnemySamurai::Tick(float DeltaTime) {
@@ -40,6 +41,22 @@ void AEnemySamurai::Tick(float DeltaTime) {
 
 	if(EnemyCurrentHealth <= 0.f) Destroy();
 	
+	if(bGotHit) {
+		if(Samurai->bLeftClick) {
+			AnimStage = HitCount == 1 ? EAnimationStage::BodyHit : EAnimationStage::HeadHit;
+		}
+		else {
+
+		}
+	}
+
+	if(bInHeadHitAnim && !MPlaying(AM_HeadHit)) {
+		bGotHit = false;
+		HitCount = 0;
+		AnimStage = EAnimationStage::StanceForward;
+		bInHeadHitAnim = false;
+	}
+
 	switch(AnimStage) {
 		case EAnimationStage::Attack:
 			if(!bAttackPlayOnce) {
@@ -68,6 +85,14 @@ void AEnemySamurai::Tick(float DeltaTime) {
 			break;
 		case EAnimationStage::StanceForward: HandleAnimation(AM_StanceForward); break;
 		case EAnimationStage::Walk: HandleAnimation(AM_Walk); break;
+		case EAnimationStage::BodyHit:
+			HandleAnimation(AM_BodyHit);
+			break;
+		case EAnimationStage::HeadHit:
+			AnimInstance->Montage_Stop(0, AM_BodyHit);
+			HandleAnimation(AM_HeadHit);
+			bInHeadHitAnim = true;
+			break;
 	}
 }
 
@@ -85,8 +110,10 @@ void AEnemySamurai::PlayAnim(UAnimMontage* AM) {
 
 void AEnemySamurai::EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if(OtherActor != this) {
-		EnemyCurrentHealth -= .35f;
+		// EnemyCurrentHealth -= .35f;
 		EnemyStatusClass->SetHealth(EnemyCurrentHealth);
+		bGotHit = true;
+		HitCount++;
 	}
 }
 
