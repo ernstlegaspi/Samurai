@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,23 +5,30 @@
 #include "EnemySamurai.generated.h"
 
 UCLASS()
-class SAMURAI_API AEnemySamurai : public ACharacter
-{
+class SAMURAI_API AEnemySamurai : public ACharacter {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AEnemySamurai();
 
+	UPROPERTY()
+	class UAnimInstance* AnimInstance;
+
+	UPROPERTY()
+	class UCharacterMovementComponent* Character;
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere)
+	class UCapsuleComponent* EnemyTrigger;
+
+	UFUNCTION()
+	void EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };

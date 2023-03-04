@@ -1,34 +1,33 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "EnemySamurai.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
-// Sets default values
-AEnemySamurai::AEnemySamurai()
-{
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+AEnemySamurai::AEnemySamurai() {
 	PrimaryActorTick.bCanEverTick = true;
 
+	EnemyTrigger = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Enemy Trigger"));
+	EnemyTrigger->InitCapsuleSize(50.f, 80.f);
+	EnemyTrigger->SetCollisionProfileName(TEXT("OverlapAll"));
+	EnemyTrigger->SetGenerateOverlapEvents(true);
+	EnemyTrigger->OnComponentBeginOverlap.AddDynamic(this, &AEnemySamurai::EnemyEnterOverlap);
+	EnemyTrigger->SetupAttachment(RootComponent);
 }
 
-// Called when the game starts or when spawned
-void AEnemySamurai::BeginPlay()
-{
+void AEnemySamurai::BeginPlay() {
 	Super::BeginPlay();
-	
+
+	AnimInstance = GetMesh()->GetAnimInstance();
+	Character = GetCharacterMovement();
 }
 
-// Called every frame
-void AEnemySamurai::Tick(float DeltaTime)
-{
+void AEnemySamurai::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
 }
 
-// Called to bind functionality to input
-void AEnemySamurai::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+void AEnemySamurai::EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	UE_LOG(LogTemp, Warning, TEXT("Enemy Hit"));
+}
+
+void AEnemySamurai::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
-
