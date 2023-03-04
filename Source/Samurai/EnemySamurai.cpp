@@ -41,7 +41,18 @@ void AEnemySamurai::Tick(float DeltaTime) {
 	if(EnemyCurrentHealth <= 0.f) Destroy();
 	
 	switch(AnimStage) {
-		case EAnimationStage::Attack: HandleAnimation(AM_Attack); break;
+		case EAnimationStage::Attack:
+			if(!bAttackPlayOnce) {
+				bAttackPlayOnce = true;
+				PlayAnim(AM_Attack);
+			}
+
+			if(!MPlaying(AM_Attack)) {
+				bAttackPlayOnce = false;
+				AnimStage = EAnimationStage::StanceForward;
+			}
+
+			break;
 		case EAnimationStage::Idle: HandleAnimation(AM_Idle); break;
 		case EAnimationStage::Run: HandleAnimation(AM_Run); break;
 		case EAnimationStage::Stance:

@@ -6,7 +6,7 @@ void USamuraiAttackState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
 	Samurai = (ASamuraiManager*)MeshComp->GetOwner();
-	Samurai->WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if(Samurai) Samurai->WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void USamuraiAttackState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) {
