@@ -13,7 +13,9 @@ enum class EAnimationStage : uint8 {
 	StanceForward = 4 UMETA(DisplayName = "STANCEFORWARD"),
 	Walk = 5 UMETA(DisplayName = "WALK"),
 	HeadHit = 6 UMETA(DisplayName = "HEADHIT"),
-	BodyHit = 7 UMETA(DisplayName = "BODYHIT")
+	BodyHit = 7 UMETA(DisplayName = "BODYHIT"),
+	KidneyHit = 8 UMETA(DisplayName = "KIDNEYHIT"),
+	SideHit = 9 UMETA(DisplayName = "SIDEHIT")
 };
 
 UCLASS()
@@ -57,6 +59,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_HeadHit;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_SideHit;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_KidneyHit;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> EnemyStatusWidget;

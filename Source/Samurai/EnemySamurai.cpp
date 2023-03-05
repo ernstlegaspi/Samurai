@@ -26,10 +26,12 @@ void AEnemySamurai::BeginPlay() {
 
 	Character = GetCharacterMovement();
 	AnimInstance = GetMesh()->GetAnimInstance();
+
 	Samurai = (ASamuraiManager*)UGameplayStatics::GetActorOfClass(GetWorld(), ASamuraiManager::StaticClass());
 	EnemyStatus->bHiddenInGame = true;
 	EnemyStatusClass = Cast<UEnemyStatusClass>(CreateWidget(GetWorld(), EnemyStatusWidget));
 	EnemyStatus->SetWidget(EnemyStatusClass);
+
 	EnemyCurrentHealth = 1.f;
 	HitCount = 0.f;
 }
@@ -42,22 +44,31 @@ void AEnemySamurai::Tick(float DeltaTime) {
 	if(EnemyCurrentHealth <= 0.f) Destroy();
 	
 	if(bGotHit) {
-		if(Samurai->bLeftClick) {
-			AnimStage = HitCount == 1 ? EAnimationStage::BodyHit : EAnimationStage::HeadHit;
+		if((HitCount == 1 && Samurai->AttackCount == 1) && bGotHit) {
+			AnimStage = Samurai->bLeftClick ? EAnimationStage::BodyHit : EAnimationStage::SideHit;
 		}
 		else {
-
+			if(((HitCount == 1 && Samurai->AttackCount == 2) || HitCount == 2) && bGotHit) {
+				AnimStage = Samurai->bLeftClick ? EAnimationStage::HeadHit : EAnimationStage::KidneyHit;
+			}
 		}
 	}
 
-	if(bInHeadHitAnim && !MPlaying(AM_HeadHit)) {
+	if(bInHeadHitAnim && !MPlaying(Samurai->bLeftClick ? AM_HeadHit : AM_KidneyHit)) {
 		bGotHit = false;
+		bInHeadHitAnim = false;
+
 		HitCount = 0;
 		AnimStage = EAnimationStage::StanceForward;
-		bInHeadHitAnim = false;
 	}
 
 	switch(AnimStage) {
+		case EAnimationStage::Idle: HandleAnimation(AM_Idle); break;
+		case EAnimationStage::Run: HandleAnimation(AM_Run); break;
+		case EAnimationStage::StanceForward: HandleAnimation(AM_StanceForward); break;
+		case EAnimationStage::Walk: HandleAnimation(AM_Walk); break;
+		case EAnimationStage::BodyHit: HandleAnimation(AM_BodyHit); break;
+		case EAnimationStage::SideHit: HandleAnimation(AM_SideHit); break;
 		case EAnimationStage::Attack:
 			if(!bAttackPlayOnce) {
 				bAttackPlayOnce = true;
@@ -68,10 +79,7 @@ void AEnemySamurai::Tick(float DeltaTime) {
 				bAttackPlayOnce = false;
 				AnimStage = EAnimationStage::StanceForward;
 			}
-
 			break;
-		case EAnimationStage::Idle: HandleAnimation(AM_Idle); break;
-		case EAnimationStage::Run: HandleAnimation(AM_Run); break;
 		case EAnimationStage::Stance:
 			if(!bStancePlayOnce) {
 				PlayAnim(AM_Stance);
@@ -83,14 +91,10 @@ void AEnemySamurai::Tick(float DeltaTime) {
 				bStancePlayOnce = false;
 			}
 			break;
-		case EAnimationStage::StanceForward: HandleAnimation(AM_StanceForward); break;
-		case EAnimationStage::Walk: HandleAnimation(AM_Walk); break;
-		case EAnimationStage::BodyHit:
-			HandleAnimation(AM_BodyHit);
-			break;
 		case EAnimationStage::HeadHit:
-			AnimInstance->Montage_Stop(0, AM_BodyHit);
-			HandleAnimation(AM_HeadHit);
+		case EAnimationStage::KidneyHit:
+			AnimInstance->Montage_Stop(.4f, AnimStage == EAnimationStage::HeadHit ? AM_BodyHit : AM_SideHit);
+			HandleAnimation(AnimStage == EAnimationStage::HeadHit ? AM_HeadHit : AM_KidneyHit);
 			bInHeadHitAnim = true;
 			break;
 	}
@@ -110,7 +114,7 @@ void AEnemySamurai::PlayAnim(UAnimMontage* AM) {
 
 void AEnemySamurai::EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if(OtherActor != this) {
-		// EnemyCurrentHealth -= .35f;
+		EnemyCurrentHealth -= .25f;
 		EnemyStatusClass->SetHealth(EnemyCurrentHealth);
 		bGotHit = true;
 		HitCount++;

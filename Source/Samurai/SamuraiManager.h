@@ -19,6 +19,7 @@ public:
 	class UBoxComponent* WeaponTrigger;
 
 	bool bLeftClick;
+	short AttackCount;
 
 protected:
 	virtual void BeginPlay() override;

@@ -35,7 +35,7 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 					}
 					else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 200.f) {
 						StopMovement();
-						GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
+						LookTo();
 						ESamurai->AnimStage = EAnimationStage::Attack;
 					}
 					else {
@@ -50,9 +50,13 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 			else {
 				StopMovement();
 				ESamurai->AnimStage = EAnimationStage::Stance;
-				GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()));
+				LookTo();
 				FollowDistance = 1000.f;
 			}
+		}
+		else {
+			StopMovement();
+			LookTo();
 		}
 	}
 	else {
@@ -86,4 +90,8 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 
 float AEnemySamuraiController::Dist(FVector D1, FVector D2) {
 	return FVector::Dist(D1, D2);
+}
+
+void AEnemySamuraiController::LookTo() {
+	GetPawn()->SetActorRotation(FRotator(0, UKismetMathLibrary::FindLookAtRotation(PawnLoc, Samurai->GetActorLocation()).Yaw, 0));
 }

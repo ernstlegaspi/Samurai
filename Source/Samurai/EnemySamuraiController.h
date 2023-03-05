@@ -26,6 +26,7 @@ protected:
 	bool bOnGround, bIdleDone;
 
 	float Dist(FVector D1, FVector D2);
+	void LookTo();
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
