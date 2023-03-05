@@ -1,6 +1,8 @@
 #include "EnemySamurai.h"
 #include "EnemyStatusClass.h"
 #include "SamuraiManager.h"
+#include "SamuraiGameModeBase.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/WidgetComponent.h"
@@ -19,6 +21,12 @@ AEnemySamurai::AEnemySamurai() {
 
 	EnemyStatus = CreateDefaultSubobject<UWidgetComponent>(TEXT("Enemy Status"));
 	EnemyStatus->SetupAttachment(RootComponent);
+
+	WeaponTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Trigger"));
+	WeaponTrigger->OnComponentBeginOverlap.AddDynamic(this, &AEnemySamurai::WeaponEnterOverlap);
+	WeaponTrigger->SetCollisionProfileName(TEXT("OverlapAll"));
+	WeaponTrigger->SetGenerateOverlapEvents(true);
+	WeaponTrigger->SetupAttachment(GetMesh(), FName("WeaponTrigger"));
 }
 
 void AEnemySamurai::BeginPlay() {
@@ -28,12 +36,15 @@ void AEnemySamurai::BeginPlay() {
 	AnimInstance = GetMesh()->GetAnimInstance();
 
 	Samurai = (ASamuraiManager*)UGameplayStatics::GetActorOfClass(GetWorld(), ASamuraiManager::StaticClass());
+	SamuraiGMB = (ASamuraiGameModeBase*)UGameplayStatics::GetActorOfClass(GetWorld(), ASamuraiGameModeBase::StaticClass());
 	EnemyStatus->bHiddenInGame = true;
 	EnemyStatusClass = Cast<UEnemyStatusClass>(CreateWidget(GetWorld(), EnemyStatusWidget));
 	EnemyStatus->SetWidget(EnemyStatusClass);
 
 	EnemyCurrentHealth = 1.f;
 	HitCount = 0.f;
+
+	WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AEnemySamurai::Tick(float DeltaTime) {
@@ -112,6 +123,14 @@ void AEnemySamurai::PlayAnim(UAnimMontage* AM) {
 	AnimInstance->Montage_Play(AM);
 }
 
+void AEnemySamurai::ActivateCollision() {
+	WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AEnemySamurai::DeactivateCollision() {
+	WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void AEnemySamurai::EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if(OtherActor != this) {
 		EnemyCurrentHealth -= .25f;
@@ -119,6 +138,10 @@ void AEnemySamurai::EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* Othe
 		bGotHit = true;
 		HitCount++;
 	}
+}
+
+void AEnemySamurai::WeaponEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if(OtherActor != this) SamuraiGMB->bHit = true;
 }
 
 void AEnemySamurai::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {

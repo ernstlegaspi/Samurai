@@ -33,13 +33,13 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 						ESamurai->Character->MaxWalkSpeed = 350.f;
 						ESamurai->AnimStage = EAnimationStage::Run;
 					}
-					else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 200.f) {
+					else if(Dist(Samurai->GetActorLocation(), PawnLoc) <= 150.f) {
 						StopMovement();
 						LookTo();
 						ESamurai->AnimStage = EAnimationStage::Attack;
 					}
 					else {
-						ESamurai->Character->MaxWalkSpeed = 150.f;
+						ESamurai->Character->MaxWalkSpeed = 130.f;
 						ESamurai->AnimStage = EAnimationStage::StanceForward;
 						MoveToLocation(Samurai->GetActorLocation());
 					}

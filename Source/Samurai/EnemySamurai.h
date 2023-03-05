@@ -33,6 +33,9 @@ public:
 
 	bool bStanceFinished, bGotHit;
 
+	void ActivateCollision();
+	void DeactivateCollision();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -73,6 +76,9 @@ protected:
 	class UCapsuleComponent* EnemyTrigger;
 
 	UPROPERTY(VisibleAnywhere)
+	class UBoxComponent* WeaponTrigger;
+
+	UPROPERTY(VisibleAnywhere)
 	class UWidgetComponent* EnemyStatus;
 
 	UPROPERTY()
@@ -84,8 +90,14 @@ protected:
 	UPROPERTY()
 	class UEnemyStatusClass* EnemyStatusClass;
 
+	UPROPERTY()
+	class ASamuraiGameModeBase* SamuraiGMB;
+
 	UFUNCTION()
 	void EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void WeaponEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	bool bStancePlayOnce, bAttackPlayOnce, bInHeadHitAnim;
 	float EnemyCurrentHealth;

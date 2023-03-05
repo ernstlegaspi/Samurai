@@ -41,29 +41,39 @@ void ASamuraiManager::BeginPlay() {
 void ASamuraiManager::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if(GetCharacterMovement()->IsMovingOnGround()) {
-		if(!bSlashing) {
-			if(GetVelocity() != FVector(0, 0, 0)) {
-				if(bShiftPressed) {
-					HandleAnimation(AM_Run);
-					GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	if(!bDead) {
+		if(GetCharacterMovement()->IsMovingOnGround()) {
+			if(!bSlashing) {
+				if(GetVelocity() != FVector(0, 0, 0)) {
+					if(bShiftPressed) {
+						HandleAnimation(AM_Run);
+						GetCharacterMovement()->MaxWalkSpeed = 500.f;
+					}
+					else {
+						HandleAnimation(AM_Walk);
+						GetCharacterMovement()->MaxWalkSpeed = 150.f;
+					}
 				}
-				else {
-					HandleAnimation(AM_Walk);
-					GetCharacterMovement()->MaxWalkSpeed = 150.f;
-				}
+				else HandleAnimation(AM_Idle);
 			}
-			else HandleAnimation(AM_Idle);
+			else {
+				if(!MIsPlaying(CurrentSlash)) bSlashing = false;
+			}
+
+			bJumping = false;
 		}
 		else {
-			if(!MIsPlaying(CurrentSlash)) bSlashing = false;
+			HandleAnimation(AM_Jump);
+			bJumping = true;
 		}
-
-		bJumping = false;
 	}
 	else {
-		HandleAnimation(AM_Jump);
-		bJumping = true;
+		if(!bDeathAnimPlayOnce) {
+			AnimInstance->Montage_Play(AM_Death);
+			bDeathAnimPlayOnce = true;
+		}
+
+		if(AnimInstance->Montage_GetIsStopped(AM_Death)) AnimInstance->Montage_JumpToSection("DeathEnd");
 	}
 }
 
@@ -72,7 +82,7 @@ bool ASamuraiManager::MIsPlaying(UAnimMontage* AM) {
 }
 
 void ASamuraiManager::HandleAnimation(UAnimMontage* AM) {
-	if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0, PrevMontage);
+	if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0.3f, PrevMontage);
 	if(!MIsPlaying(AM)) AnimInstance->Montage_Play(AM);
 
 	PrevMontage = AM;
@@ -81,7 +91,7 @@ void ASamuraiManager::HandleAnimation(UAnimMontage* AM) {
 void ASamuraiManager::Move(const FInputActionValue& Value) {
 	const FVector2D Dir = Value.Get<FVector2D>();
 
-	if(Controller != nullptr && !bJumping) {
+	if(Controller != nullptr && !bJumping && !bDead) {
 		FRotator SamuraiRotation = GetControlRotation();
 		FRotator NewYawRotation(0, SamuraiRotation.Yaw, 0);
 
@@ -96,14 +106,14 @@ void ASamuraiManager::Move(const FInputActionValue& Value) {
 void ASamuraiManager::MouseLook(const FInputActionValue& Value) {
 	const FVector2D LookAxis = Value.Get<FVector2D>();
 
-	if(Controller != nullptr) {
+	if(Controller != nullptr && !bDead) {
 		AddControllerYawInput(-LookAxis.X);
 		AddControllerPitchInput(LookAxis.Y);
 	}
 }
 
 void ASamuraiManager::SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM) {
-	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM) && !bJumping) {
+	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM) && !bJumping && !bDead) {
 		if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0, PrevMontage);
 		AnimInstance->Montage_Play(AM);
 		PrevMontage = AM;
@@ -123,11 +133,11 @@ void ASamuraiManager::Slash2Start() {
 }
 
 void ASamuraiManager::Run() {
-	if(!bJumping) bShiftPressed = true;
+	if(!bJumping && !bDead) bShiftPressed = true;
 }
 
 void ASamuraiManager::RunCompleted() {
-	if(!bJumping) bShiftPressed = false;
+	if(!bJumping && !bDead) bShiftPressed = false;
 }
 
 void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {

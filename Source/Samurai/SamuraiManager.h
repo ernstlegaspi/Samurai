@@ -18,11 +18,14 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UBoxComponent* WeaponTrigger;
 
-	bool bLeftClick;
+	bool bLeftClick, bDead;
 	short AttackCount;
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_Death;
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_Slash1;
@@ -86,7 +89,7 @@ protected:
 	void RunCompleted();
 
 	float Slash1Time;
-	bool bShiftPressed, bSlashing, bJumping;
+	bool bShiftPressed, bSlashing, bJumping, bDeathAnimPlayOnce;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
