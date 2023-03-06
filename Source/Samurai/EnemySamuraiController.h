@@ -11,7 +11,7 @@ class SAMURAI_API AEnemySamuraiController : public AAIController {
 
 protected:
 	UPROPERTY()
-	class APawn* Samurai;
+	class ASamuraiManager* Samurai;
 
 	UPROPERTY()
 	class UNavigationSystemV1* NavLoc;

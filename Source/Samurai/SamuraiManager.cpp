@@ -43,7 +43,14 @@ void ASamuraiManager::Tick(float DeltaTime) {
 
 	if(!bDead) {
 		if(GetCharacterMovement()->IsMovingOnGround()) {
-			if(!bSlashing) {
+			if(bControlPressed) {
+				// HandleAnimation(AM_Roll);
+				AnimInstance->Montage_Play(AM_Roll);
+
+				if(!AnimInstance->Montage_IsPlaying(AM_Roll)) bControlPressed = true;
+
+			}
+			else if(!bSlashing) {
 				if(GetVelocity() != FVector(0, 0, 0)) {
 					if(bShiftPressed) {
 						HandleAnimation(AM_Run);
@@ -106,7 +113,7 @@ void ASamuraiManager::Move(const FInputActionValue& Value) {
 void ASamuraiManager::MouseLook(const FInputActionValue& Value) {
 	const FVector2D LookAxis = Value.Get<FVector2D>();
 
-	if(Controller != nullptr && !bDead) {
+	if(Controller != nullptr) {
 		AddControllerYawInput(-LookAxis.X);
 		AddControllerPitchInput(LookAxis.Y);
 	}
@@ -132,6 +139,13 @@ void ASamuraiManager::Slash2Start() {
 	bLeftClick = false;
 }
 
+void ASamuraiManager::Roll() {
+	if(!bJumping && !bDead) {
+		bControlPressed = true;
+		// GetMesh()->AddImpulse(GetActorForwardVector() * 150.f * GetMesh()->GetMass());
+	}
+}
+
 void ASamuraiManager::Run() {
 	if(!bJumping && !bDead) bShiftPressed = true;
 }
@@ -148,6 +162,7 @@ void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Move);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ASamuraiManager::MouseLook);
+		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &ASamuraiManager::Roll);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ASamuraiManager::Run);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ASamuraiManager::RunCompleted);
 		EnhancedInputComponent->BindAction(Slash1Action, ETriggerEvent::Started, this, &ASamuraiManager::Slash1Start);

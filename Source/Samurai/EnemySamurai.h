@@ -70,6 +70,9 @@ protected:
 	UAnimMontage* AM_KidneyHit;
 
 	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* NS_Death;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> EnemyStatusWidget;
 
 	UPROPERTY(VisibleAnywhere)

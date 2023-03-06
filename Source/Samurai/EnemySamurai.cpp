@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
 
 AEnemySamurai::AEnemySamurai() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -52,7 +53,10 @@ void AEnemySamurai::Tick(float DeltaTime) {
 
 	EnemyStatus->bHiddenInGame = !(FVector::Dist(Samurai->GetActorLocation(), GetActorLocation()) <= 1000.f);
 
-	if(EnemyCurrentHealth <= 0.f) Destroy();
+	if(EnemyCurrentHealth <= 0.f) {
+		Destroy();
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Death, GetActorLocation());
+	}
 	
 	if(bGotHit) {
 		if((HitCount == 1 && Samurai->AttackCount == 1) && bGotHit) {
@@ -132,7 +136,7 @@ void AEnemySamurai::DeactivateCollision() {
 }
 
 void AEnemySamurai::EnemyEnterOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if(OtherActor != this) {
+	if(OtherActor->GetName().Contains("SamuraiManager")) {
 		EnemyCurrentHealth -= .25f;
 		EnemyStatusClass->SetHealth(EnemyCurrentHealth);
 		bGotHit = true;

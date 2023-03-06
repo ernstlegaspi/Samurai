@@ -1,5 +1,6 @@
 #include "EnemySamuraiController.h"
 #include "EnemySamurai.h"
+#include "SamuraiManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -9,7 +10,7 @@
 void AEnemySamuraiController::BeginPlay() {
 	Super::BeginPlay();
 
-	Samurai = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	Samurai = (ASamuraiManager*)UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	ESamurai = Cast<AEnemySamurai>(GetPawn());
 	NavLoc = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
 	bOnGround = NavLoc->GetRandomReachablePointInRadius(PawnLoc, 500.f, Loc);
@@ -24,7 +25,7 @@ void AEnemySamuraiController::Tick(float DeltaTime) {
 	
 	PawnLoc = GetPawn()->GetActorLocation();
 
-	if(Dist(Samurai->GetActorLocation(), PawnLoc) <= (1000.f + FollowDistance)) {
+	if(Dist(Samurai->GetActorLocation(), PawnLoc) <= (1000.f + FollowDistance) && !Samurai->bDead) {
 		if(!ESamurai->bGotHit) {
 			if(ESamurai->bStanceFinished) {
 				if(ESamurai->AnimStage != EAnimationStage::Attack) {

@@ -43,6 +43,9 @@ protected:
 	UAnimMontage* AM_Walk;
 
 	UPROPERTY(EditAnywhere)
+	UAnimMontage* AM_Roll;
+
+	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_Run;
 
 	UPROPERTY(EditAnywhere)
@@ -59,6 +62,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere)
+	UInputAction* RollAction;
 
 	UPROPERTY(EditAnywhere)
 	UInputAction* RunAction;
@@ -85,11 +91,12 @@ protected:
 	void SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM);
 	void Slash1Start();
 	void Slash2Start();
+	void Roll();
 	void Run();
 	void RunCompleted();
 
 	float Slash1Time;
-	bool bShiftPressed, bSlashing, bJumping, bDeathAnimPlayOnce;
+	bool bControlPressed, bShiftPressed, bSlashing, bJumping, bDeathAnimPlayOnce;
 
 public:	
 	virtual void Tick(float DeltaTime) override;

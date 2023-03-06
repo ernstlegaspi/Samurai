@@ -23,8 +23,7 @@ void ASamuraiGameModeBase::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	if(bHit) {
-		CurrentHealth -= 1.f;
-		// CurrentHealth -= .15f;
+		CurrentHealth -= .15f;
 		PlayerStatusClass->SetHealth(CurrentHealth);
 		bHit = false;
 
