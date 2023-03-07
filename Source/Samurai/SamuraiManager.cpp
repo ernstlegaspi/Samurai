@@ -1,10 +1,10 @@
 #include "SamuraiManager.h"
 #include "Camera/CameraComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -25,6 +25,9 @@ ASamuraiManager::ASamuraiManager() {
 	WeaponTrigger->SetCollisionProfileName(TEXT("OverlapAll"));
 	WeaponTrigger->SetGenerateOverlapEvents(true);
 	WeaponTrigger->SetupAttachment(GetMesh(), FName("WeaponTrigger"));
+
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
+	CameraBoom->SetupAttachment(GetMesh());
 }
 
 void ASamuraiManager::BeginPlay() {

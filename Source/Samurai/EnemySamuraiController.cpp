@@ -7,13 +7,17 @@
 #include "Math/Vector.h"
 #include "NavigationSystem.h"
 
+AEnemySamuraiController::AEnemySamuraiController() {
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 void AEnemySamuraiController::BeginPlay() {
 	Super::BeginPlay();
 
 	Samurai = (ASamuraiManager*)UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	ESamurai = Cast<AEnemySamurai>(GetPawn());
 	NavLoc = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
-	bOnGround = NavLoc->GetRandomReachablePointInRadius(PawnLoc, 500.f, Loc);
+	bOnGround = NavLoc->GetRandomReachablePointInRadius(ESamurai->GetActorLocation(), 500.f, Loc);
 	MoveToLocation(Loc.Location);
 	FollowDistance = 0;
 	IdleTimer = 0;
@@ -22,7 +26,7 @@ void AEnemySamuraiController::BeginPlay() {
 
 void AEnemySamuraiController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-	
+
 	PawnLoc = GetPawn()->GetActorLocation();
 
 	if(Dist(Samurai->GetActorLocation(), PawnLoc) <= (1000.f + FollowDistance) && !Samurai->bDead) {

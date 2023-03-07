@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "NavigationSystem.h"
 #include "EnemySamuraiController.generated.h"
 
 UCLASS()
@@ -10,6 +9,8 @@ class SAMURAI_API AEnemySamuraiController : public AAIController {
 	GENERATED_BODY()
 
 protected:
+	AEnemySamuraiController();
+
 	UPROPERTY()
 	class ASamuraiManager* Samurai;
 

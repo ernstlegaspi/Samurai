@@ -81,6 +81,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* SamuraiTrigger;
 
+	UPROPERTY(VisibleAnywhere)
+	class USpringArmComponent* CameraBoom;
+
 	UPROPERTY()
 	class UAnimInstance* AnimInstance;
 
@@ -107,6 +110,8 @@ protected:
 	bool bControlPressed, bShiftPressed, bSlashing, bJumping, bDeathAnimPlayOnce;
 
 public:	
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
