@@ -59,6 +59,7 @@ void AEnemySamurai::Tick(float DeltaTime) {
 		if(EnemyCurrentHealth <= 0.f) {
 			Destroy();
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Death, GetActorLocation());
+			Samurai->EnemyKillCount++;
 		}
 	
 		if(bGotHit) {

@@ -4,6 +4,7 @@
 #include "PlayerStatusClass.h"
 #include "StartMenuClass.h"
 #include "SamuraiManager.h"
+#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
 ASamuraiGameModeBase::ASamuraiGameModeBase() {
@@ -36,12 +37,13 @@ void ASamuraiGameModeBase::Tick(float DeltaTime) {
 			PlayerStatusClass = CreateWidget<UPlayerStatusClass>(GetWorld(), PlayerStatusWidget);
 			PlayerStatusClass->AddToViewport();
 		}
-
-		if(StartMenuClass->bControlsClicked) {
-			StartMenuClass->bControlsClicked = false;
-			StartMenuClass->RemoveFromParent();
-			ControlsMenuClass = CreateWidget<UControlsMenuClass>(GetWorld(), ControlsMenuWidget);
-			ControlsMenuClass->AddToViewport();
+		else {
+			if(StartMenuClass->bControlsClicked) {
+				StartMenuClass->bControlsClicked = false;
+				StartMenuClass->RemoveFromParent();
+				ControlsMenuClass = CreateWidget<UControlsMenuClass>(GetWorld(), ControlsMenuWidget);
+				ControlsMenuClass->AddToViewport();
+			}
 		}
 	}
 
@@ -55,7 +57,7 @@ void ASamuraiGameModeBase::Tick(float DeltaTime) {
 		}
 	}
 
-	if(PlayerStatusClass != nullptr && bHit) {
+	if(PlayerStatusClass != nullptr && bHit && !bPlayerWon) {
 		CurrentHealth -= .15f;
 		PlayerStatusClass->SetHealth(CurrentHealth);
 		bHit = false;
@@ -64,8 +66,19 @@ void ASamuraiGameModeBase::Tick(float DeltaTime) {
 			Samurai->bDead = true;
 			PlayerStatusClass->RemoveFromParent();
 			PlayerStatusClass = nullptr;
-			DeathScreenClass = CreateWidget<UDeathScreenClass>(GetWorld(), DeathScreenWidget);
-			DeathScreenClass->AddToViewport();
+			GameStatusClass = CreateWidget<UDeathScreenClass>(GetWorld(), GameStatusWidget);
+			GameStatusClass->AddToViewport();
+			GameStatusClass->PlayerStatusText->SetText(FText::FromString("You died!"));
+		}
+	}
+	else {
+		if(bPlayerWon && !bShowOnce) {
+			PlayerStatusClass->RemoveFromParent();
+			PlayerStatusClass = nullptr;
+			GameStatusClass = CreateWidget<UDeathScreenClass>(GetWorld(), GameStatusWidget);
+			GameStatusClass->AddToViewport();
+			GameStatusClass->PlayerStatusText->SetText(FText::FromString("You won!"));
+			bShowOnce = true;
 		}
 	}
 }

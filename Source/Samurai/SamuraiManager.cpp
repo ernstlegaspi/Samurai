@@ -46,10 +46,19 @@ void ASamuraiManager::BeginPlay() {
 	PC->DefaultMouseCursor = EMouseCursor::Default;
 	AnimInstance = GetMesh()->GetAnimInstance();
 	WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RollCount = 10.f;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemySamurai::StaticClass(), Enemies);
+	for(auto& _Enemy : Enemies) TotalEnemies++;
+	UE_LOG(LogTemp, Warning, TEXT("T: %d"), TotalEnemies);
 }
 
 void ASamuraiManager::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	if(TotalEnemies == EnemyKillCount) {
+		SamuraiGMB->bPlayerWon = true;
+		TotalEnemies++;
+	}
 
 	if(SamuraiGMB->Stage == 1) {
 		PC->bShowMouseCursor = false;
@@ -63,46 +72,58 @@ void ASamuraiManager::Tick(float DeltaTime) {
 		SamuraiGMB->Stage = 2;
 	}
 
-	if(!bDead) {
-		if(GetCharacterMovement()->IsMovingOnGround()) {
-			if(bControlPressed) {
-				// HandleAnimation(AM_Roll);
-				AnimInstance->Montage_Play(AM_Roll);
+	GetCharacterMovement()->JumpZVelocity = AnimInstance->Montage_IsPlaying(AM_RollForward) ? 0.f : 500.f;
 
-				if(!AnimInstance->Montage_IsPlaying(AM_Roll)) bControlPressed = true;
+	if(RollTime > 0) RollTime -= DeltaTime;
 
-			}
-			else if(!bSlashing) {
-				if(GetVelocity() != FVector(0, 0, 0)) {
-					if(bShiftPressed) {
-						HandleAnimation(AM_Run);
-						GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	if(!SamuraiGMB->bPlayerWon) {
+		if(!bDead) {
+			if(GetCharacterMovement()->IsMovingOnGround()) {
+				if(bControlPressed) {
+					AnimInstance->Montage_Play(AM_RollForward);
+					bControlPressed = false;
+					RollTime = 3.f;
+				}
+
+				if(!AnimInstance->Montage_IsPlaying(AM_RollForward)) {
+					if(!bSlashing) {
+						if(GetVelocity() != FVector(0, 0, 0)) {
+							if(bShiftPressed) {
+								HandleAnimation(AM_Run);
+								GetCharacterMovement()->MaxWalkSpeed = 500.f;
+							}
+							else {
+								HandleAnimation(AM_Walk);
+								GetCharacterMovement()->MaxWalkSpeed = 150.f;
+							}
+						}
+						else HandleAnimation(AM_Idle);
 					}
 					else {
-						HandleAnimation(AM_Walk);
-						GetCharacterMovement()->MaxWalkSpeed = 150.f;
+						if(!MIsPlaying(CurrentSlash)) bSlashing = false;
 					}
+
+					bJumping = false;
 				}
-				else HandleAnimation(AM_Idle);
 			}
 			else {
-				if(!MIsPlaying(CurrentSlash)) bSlashing = false;
+				if(!AnimInstance->Montage_IsPlaying(AM_RollForward)) {
+					HandleAnimation(AM_Jump);
+					bJumping = true;
+				}
 			}
-
-			bJumping = false;
 		}
 		else {
-			HandleAnimation(AM_Jump);
-			bJumping = true;
+			if(!bDeathAnimPlayOnce) {
+				AnimInstance->Montage_Play(AM_Death);
+				bDeathAnimPlayOnce = true;
+			}
+
+			if(AnimInstance->Montage_GetIsStopped(AM_Death)) AnimInstance->Montage_JumpToSection("DeathEnd");
 		}
 	}
 	else {
-		if(!bDeathAnimPlayOnce) {
-			AnimInstance->Montage_Play(AM_Death);
-			bDeathAnimPlayOnce = true;
-		}
-
-		if(AnimInstance->Montage_GetIsStopped(AM_Death)) AnimInstance->Montage_JumpToSection("DeathEnd");
+		HandleAnimation(AM_Idle);
 	}
 }
 
@@ -120,7 +141,7 @@ void ASamuraiManager::HandleAnimation(UAnimMontage* AM) {
 void ASamuraiManager::Move(const FInputActionValue& Value) {
 	const FVector2D Dir = Value.Get<FVector2D>();
 
-	if(Controller != nullptr && !bJumping && !bDead && SamuraiGMB->Stage == 2) {
+	if(Controller != nullptr && !bJumping && !bDead && SamuraiGMB->Stage == 2 && !SamuraiGMB->bPlayerWon) {
 		FRotator SamuraiRotation = GetControlRotation();
 		FRotator NewYawRotation(0, SamuraiRotation.Yaw, 0);
 
@@ -142,7 +163,7 @@ void ASamuraiManager::MouseLook(const FInputActionValue& Value) {
 }
 
 void ASamuraiManager::SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM) {
-	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM) && !bJumping && !bDead && SamuraiGMB->Stage == 2) {
+	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM) && !bJumping && !bDead && SamuraiGMB->Stage == 2 && !SamuraiGMB->bPlayerWon) {
 		if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0, PrevMontage);
 		AnimInstance->Montage_Play(AM);
 		PrevMontage = AM;
@@ -162,14 +183,14 @@ void ASamuraiManager::Slash2Start() {
 }
 
 void ASamuraiManager::Roll() {
-	if(!bJumping && !bDead && SamuraiGMB->Stage == 2) {
+	if(!bJumping && !bDead && SamuraiGMB->Stage == 2 && RollTime <= 0 && RollCount > 0 && !SamuraiGMB->bPlayerWon) {
 		bControlPressed = true;
-		// GetMesh()->AddImpulse(GetActorForwardVector() * 150.f * GetMesh()->GetMass());
+		RollCount--;
 	}
 }
 
 void ASamuraiManager::Run() {
-	if(!bJumping && !bDead && SamuraiGMB->Stage == 2) bShiftPressed = true;
+	if(!bJumping && !bDead && SamuraiGMB->Stage == 2 && !SamuraiGMB->bPlayerWon) bShiftPressed = true;
 }
 
 void ASamuraiManager::RestartGameAction() {
@@ -181,7 +202,7 @@ void ASamuraiManager::QuitGameAction() {
 }
 
 void ASamuraiManager::RunCompleted() {
-	if(!bJumping && !bDead && SamuraiGMB->Stage == 2) bShiftPressed = false;
+	if(!bJumping && !bDead && SamuraiGMB->Stage == 2 && !SamuraiGMB->bPlayerWon) bShiftPressed = false;
 }
 
 void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {

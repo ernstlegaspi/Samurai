@@ -10,7 +10,7 @@ class SAMURAI_API ASamuraiGameModeBase : public AGameModeBase {
 	GENERATED_BODY()
 	
 public:
-	bool bHit;
+	bool bHit, bPlayerWon;
 	short Stage;
 
 protected:
@@ -23,7 +23,7 @@ protected:
 	TSubclassOf<UUserWidget> ControlsMenuWidget;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> DeathScreenWidget;
+	TSubclassOf<UUserWidget> GameStatusWidget;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> StartMenuWidget;
@@ -32,7 +32,7 @@ protected:
 	class UPlayerStatusClass* PlayerStatusClass;
 
 	UPROPERTY()
-	class UDeathScreenClass* DeathScreenClass;
+	class UDeathScreenClass* GameStatusClass;
 
 	UPROPERTY()
 	class UStartMenuClass* StartMenuClass;
@@ -43,6 +43,7 @@ protected:
 	UPROPERTY()
 	class ASamuraiManager* Samurai;
 
+	bool bShowOnce;
 	float CurrentHealth;
 
 	virtual void BeginPlay() override;

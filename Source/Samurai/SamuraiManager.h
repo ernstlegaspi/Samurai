@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "EnemySamurai.h"
 #include "SamuraiManager.generated.h"
 
 class UAnimMontage;
@@ -19,7 +20,7 @@ public:
 	class UBoxComponent* WeaponTrigger;
 
 	bool bLeftClick, bDead;
-	short AttackCount;
+	short AttackCount, EnemyKillCount;
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,7 +44,7 @@ protected:
 	UAnimMontage* AM_Walk;
 
 	UPROPERTY(EditAnywhere)
-	UAnimMontage* AM_Roll;
+	UAnimMontage* AM_RollForward;
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* AM_Run;
@@ -97,6 +98,12 @@ protected:
 	class ASamuraiGameModeBase* SamuraiGMB;
 
 	UPROPERTY()
+	TSubclassOf<AActor> EnemyToFind;
+
+	UPROPERTY()
+	TArray<AActor*> Enemies;
+
+	UPROPERTY()
 	APlayerController* PC;
 
 	bool MIsPlaying(UAnimMontage* AM);
@@ -112,7 +119,8 @@ protected:
 	void RestartGameAction();
 	void QuitGameAction();
 
-	float Slash1Time;
+	float Slash1Time, RollTime;
+	short RollCount, TotalEnemies;
 	bool bControlPressed, bShiftPressed, bSlashing, bJumping, bDeathAnimPlayOnce;
 
 public:	
