@@ -17,8 +17,14 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> PlayerStatusWidget;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> DeathScreenWidget;
+
 	UPROPERTY()
 	class UPlayerStatusClass* PlayerStatusClass;
+
+	UPROPERTY()
+	class UDeathScreenClass* DeathScreenClass;
 
 	UPROPERTY()
 	class ASamuraiManager* Samurai;

@@ -7,6 +7,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ASamuraiManager::ASamuraiManager() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -150,6 +152,14 @@ void ASamuraiManager::Run() {
 	if(!bJumping && !bDead) bShiftPressed = true;
 }
 
+void ASamuraiManager::RestartGameAction() {
+	UGameplayStatics::OpenLevel(GetWorld(), FName(UGameplayStatics::GetCurrentLevelName(GetWorld())));
+}
+
+void ASamuraiManager::QuitGameAction() {
+	UKismetSystemLibrary::QuitGame(GetWorld(), (APlayerController*)GetController(), EQuitPreference::Quit, true);
+}
+
 void ASamuraiManager::RunCompleted() {
 	if(!bJumping && !bDead) bShiftPressed = false;
 }
@@ -167,5 +177,7 @@ void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ASamuraiManager::RunCompleted);
 		EnhancedInputComponent->BindAction(Slash1Action, ETriggerEvent::Started, this, &ASamuraiManager::Slash1Start);
 		EnhancedInputComponent->BindAction(Slash2Action, ETriggerEvent::Started, this, &ASamuraiManager::Slash2Start);
+		EnhancedInputComponent->BindAction(RestartAction, ETriggerEvent::Triggered, this, &ASamuraiManager::RestartGameAction);
+		EnhancedInputComponent->BindAction(QuitAction, ETriggerEvent::Triggered, this, &ASamuraiManager::QuitGameAction);
 	}
 }

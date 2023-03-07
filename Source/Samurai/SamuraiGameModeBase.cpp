@@ -1,4 +1,5 @@
 #include "SamuraiGameModeBase.h"
+#include "DeathScreenClass.h"
 #include "PlayerStatusClass.h"
 #include "SamuraiManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -27,6 +28,13 @@ void ASamuraiGameModeBase::Tick(float DeltaTime) {
 		PlayerStatusClass->SetHealth(CurrentHealth);
 		bHit = false;
 
-		if(CurrentHealth <= 0) Samurai->bDead = true;
+		if(CurrentHealth <= 0) {
+			Samurai->bDead = true;
+			PlayerStatusClass->RemoveFromParent();
+			PlayerStatusClass = nullptr;
+			DeathScreenClass = CreateWidget<UDeathScreenClass>(GetWorld(), DeathScreenWidget);
+			DeathScreenClass->AddToViewport();
+			UE_LOG(LogTemp, Warning, TEXT("Deaddd"));
+		}
 	}
 }

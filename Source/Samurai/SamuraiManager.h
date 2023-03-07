@@ -55,6 +55,12 @@ protected:
 	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere)
+	UInputAction* RestartAction;
+	
+	UPROPERTY(EditAnywhere)
+	UInputAction* QuitAction;
+
+	UPROPERTY(EditAnywhere)
 	UInputAction* Slash1Action;
 
 	UPROPERTY(EditAnywhere)
@@ -94,6 +100,8 @@ protected:
 	void Roll();
 	void Run();
 	void RunCompleted();
+	void RestartGameAction();
+	void QuitGameAction();
 
 	float Slash1Time;
 	bool bControlPressed, bShiftPressed, bSlashing, bJumping, bDeathAnimPlayOnce;
