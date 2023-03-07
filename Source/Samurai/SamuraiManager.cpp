@@ -2,6 +2,7 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "SamuraiGameModeBase.h"
 #include "Components/InputComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -39,12 +40,28 @@ void ASamuraiManager::BeginPlay() {
 		}
 	}
 
+	SamuraiGMB = (ASamuraiGameModeBase*)UGameplayStatics::GetActorOfClass(this, ASamuraiGameModeBase::StaticClass());
+	PC = GetWorld()->GetFirstPlayerController();
+	PC->bShowMouseCursor = true;
+	PC->DefaultMouseCursor = EMouseCursor::Default;
 	AnimInstance = GetMesh()->GetAnimInstance();
 	WeaponTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ASamuraiManager::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	if(SamuraiGMB->Stage == 1) {
+		PC->bShowMouseCursor = false;
+		CameraBoom->TargetArmLength = 600.f;
+		CameraBoom->bInheritPitch = true;
+		CameraBoom->bInheritYaw = true;
+		CameraBoom->bInheritRoll = true;
+		CameraBoom->bUsePawnControlRotation = true;
+		CameraBoom->SetRelativeRotation(FRotator(0, 90, 0));
+		GetCharacterMovement()->JumpZVelocity = 500.f;
+		SamuraiGMB->Stage = 2;
+	}
 
 	if(!bDead) {
 		if(GetCharacterMovement()->IsMovingOnGround()) {
@@ -103,7 +120,7 @@ void ASamuraiManager::HandleAnimation(UAnimMontage* AM) {
 void ASamuraiManager::Move(const FInputActionValue& Value) {
 	const FVector2D Dir = Value.Get<FVector2D>();
 
-	if(Controller != nullptr && !bJumping && !bDead) {
+	if(Controller != nullptr && !bJumping && !bDead && SamuraiGMB->Stage == 2) {
 		FRotator SamuraiRotation = GetControlRotation();
 		FRotator NewYawRotation(0, SamuraiRotation.Yaw, 0);
 
@@ -125,7 +142,7 @@ void ASamuraiManager::MouseLook(const FInputActionValue& Value) {
 }
 
 void ASamuraiManager::SlashManager(UAnimMontage* AM, UAnimMontage* OtherAM) {
-	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM) && !bJumping && !bDead) {
+	if(!MIsPlaying(AM) && !MIsPlaying(OtherAM) && !bJumping && !bDead && SamuraiGMB->Stage == 2) {
 		if(MIsPlaying(PrevMontage) && PrevMontage != AM) AnimInstance->Montage_Stop(0, PrevMontage);
 		AnimInstance->Montage_Play(AM);
 		PrevMontage = AM;
@@ -145,14 +162,14 @@ void ASamuraiManager::Slash2Start() {
 }
 
 void ASamuraiManager::Roll() {
-	if(!bJumping && !bDead) {
+	if(!bJumping && !bDead && SamuraiGMB->Stage == 2) {
 		bControlPressed = true;
 		// GetMesh()->AddImpulse(GetActorForwardVector() * 150.f * GetMesh()->GetMass());
 	}
 }
 
 void ASamuraiManager::Run() {
-	if(!bJumping && !bDead) bShiftPressed = true;
+	if(!bJumping && !bDead && SamuraiGMB->Stage == 2) bShiftPressed = true;
 }
 
 void ASamuraiManager::RestartGameAction() {
@@ -164,7 +181,7 @@ void ASamuraiManager::QuitGameAction() {
 }
 
 void ASamuraiManager::RunCompleted() {
-	if(!bJumping && !bDead) bShiftPressed = false;
+	if(!bJumping && !bDead && SamuraiGMB->Stage == 2) bShiftPressed = false;
 }
 
 void ASamuraiManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {

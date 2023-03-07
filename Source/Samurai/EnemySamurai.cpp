@@ -51,32 +51,39 @@ void AEnemySamurai::BeginPlay() {
 void AEnemySamurai::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	EnemyStatus->bHiddenInGame = !(FVector::Dist(Samurai->GetActorLocation(), GetActorLocation()) <= 1000.f);
+	if(SamuraiGMB->Stage == 2) {
+		SetActorHiddenInGame(false);
 
-	if(EnemyCurrentHealth <= 0.f) {
-		Destroy();
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Death, GetActorLocation());
-	}
-	
-	if(bGotHit) {
-		if((HitCount == 1 && Samurai->AttackCount == 1) && bGotHit) {
-			AnimStage = Samurai->bLeftClick ? EAnimationStage::BodyHit : EAnimationStage::SideHit;
+		EnemyStatus->bHiddenInGame = !(FVector::Dist(Samurai->GetActorLocation(), GetActorLocation()) <= 1000.f);
+
+		if(EnemyCurrentHealth <= 0.f) {
+			Destroy();
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Death, GetActorLocation());
 		}
-		else {
-			if(((HitCount == 1 && Samurai->AttackCount == 2) || HitCount == 2) && bGotHit) {
-				AnimStage = Samurai->bLeftClick ? EAnimationStage::HeadHit : EAnimationStage::KidneyHit;
+	
+		if(bGotHit) {
+			if((HitCount == 1 && Samurai->AttackCount == 1) && bGotHit) {
+				AnimStage = Samurai->bLeftClick ? EAnimationStage::BodyHit : EAnimationStage::SideHit;
+			}
+			else {
+				if(((HitCount == 1 && Samurai->AttackCount == 2) || HitCount == 2) && bGotHit) {
+					AnimStage = Samurai->bLeftClick ? EAnimationStage::HeadHit : EAnimationStage::KidneyHit;
+				}
 			}
 		}
+
+		if(bInHeadHitAnim && !MPlaying(Samurai->bLeftClick ? AM_HeadHit : AM_KidneyHit)) {
+			bGotHit = false;
+			bInHeadHitAnim = false;
+
+			HitCount = 0;
+			AnimStage = EAnimationStage::StanceForward;
+		}
 	}
-
-	if(bInHeadHitAnim && !MPlaying(Samurai->bLeftClick ? AM_HeadHit : AM_KidneyHit)) {
-		bGotHit = false;
-		bInHeadHitAnim = false;
-
-		HitCount = 0;
-		AnimStage = EAnimationStage::StanceForward;
+	else {
+		SetActorHiddenInGame(true);
 	}
-
+	
 	switch(AnimStage) {
 		case EAnimationStage::Idle: HandleAnimation(AM_Idle); break;
 		case EAnimationStage::Run: HandleAnimation(AM_Run); break;

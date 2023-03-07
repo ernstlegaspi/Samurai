@@ -20,6 +20,9 @@ protected:
 	UPROPERTY()
 	class AEnemySamurai* ESamurai;
 
+	UPROPERTY()
+	class ASamuraiGameModeBase* SamuraiGMB;
+
 	FNavLocation Loc;
 	FVector PawnLoc;
 

@@ -1,4 +1,5 @@
 #include "SamuraiGameModeBase.h"
+#include "ControlsMenuClass.h"
 #include "DeathScreenClass.h"
 #include "PlayerStatusClass.h"
 #include "StartMenuClass.h"
@@ -19,6 +20,7 @@ void ASamuraiGameModeBase::BeginPlay() {
 
 	CurrentHealth = 1.f;
 	PlayerStatusClass = nullptr;
+	ControlsMenuClass = nullptr;
 	Samurai = (ASamuraiManager*)UGameplayStatics::GetActorOfClass(this, ASamuraiManager::StaticClass());
 }
 
@@ -27,12 +29,29 @@ void ASamuraiGameModeBase::Tick(float DeltaTime) {
 
 	if(StartMenuClass != nullptr) {
 		if(StartMenuClass->bStartClicked) {
-			bStarted = true;
+			Stage = 1;
 			StartMenuClass->bStartClicked = false;
 			StartMenuClass->RemoveFromParent();
 			StartMenuClass = nullptr;
 			PlayerStatusClass = CreateWidget<UPlayerStatusClass>(GetWorld(), PlayerStatusWidget);
 			PlayerStatusClass->AddToViewport();
+		}
+
+		if(StartMenuClass->bControlsClicked) {
+			StartMenuClass->bControlsClicked = false;
+			StartMenuClass->RemoveFromParent();
+			ControlsMenuClass = CreateWidget<UControlsMenuClass>(GetWorld(), ControlsMenuWidget);
+			ControlsMenuClass->AddToViewport();
+		}
+	}
+
+	if(ControlsMenuClass != nullptr) {
+		if(ControlsMenuClass->bBackButtonClicked) {
+			ControlsMenuClass->RemoveFromParent();
+			ControlsMenuClass->bBackButtonClicked = false;
+			ControlsMenuClass = nullptr;
+			StartMenuClass->bControlsClicked = false;
+			StartMenuClass->AddToViewport();
 		}
 	}
 

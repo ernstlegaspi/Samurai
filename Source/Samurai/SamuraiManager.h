@@ -93,6 +93,12 @@ protected:
 	UPROPERTY()
 	UAnimMontage* CurrentSlash;
 
+	UPROPERTY()
+	class ASamuraiGameModeBase* SamuraiGMB;
+
+	UPROPERTY()
+	APlayerController* PC;
+
 	bool MIsPlaying(UAnimMontage* AM);
 	void HandleAnimation(UAnimMontage* AM);
 	void Move(const FInputActionValue& Value);

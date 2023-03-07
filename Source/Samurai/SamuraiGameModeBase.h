@@ -10,13 +10,17 @@ class SAMURAI_API ASamuraiGameModeBase : public AGameModeBase {
 	GENERATED_BODY()
 	
 public:
-	bool bHit, bStarted;
+	bool bHit;
+	short Stage;
 
 protected:
 	ASamuraiGameModeBase();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> PlayerStatusWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> ControlsMenuWidget;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> DeathScreenWidget;
@@ -32,6 +36,9 @@ protected:
 
 	UPROPERTY()
 	class UStartMenuClass* StartMenuClass;
+
+	UPROPERTY()
+	class UControlsMenuClass* ControlsMenuClass;
 
 	UPROPERTY()
 	class ASamuraiManager* Samurai;
